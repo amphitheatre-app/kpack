@@ -140,9 +140,11 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedGitSource":           schema_pkg_apis_core_v1alpha1_ResolvedGitSource(ref),
 		"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedRegistrySource":      schema_pkg_apis_core_v1alpha1_ResolvedRegistrySource(ref),
 		"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedSourceConfig":        schema_pkg_apis_core_v1alpha1_ResolvedSourceConfig(ref),
+		"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedVolumeSource":        schema_pkg_apis_core_v1alpha1_ResolvedVolumeSource(ref),
 		"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.SourceConfig":                schema_pkg_apis_core_v1alpha1_SourceConfig(ref),
 		"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Status":                      schema_pkg_apis_core_v1alpha1_Status(ref),
 		"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.VolatileTime":                schema_pkg_apis_core_v1alpha1_VolatileTime(ref),
+		"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Volume":                      schema_pkg_apis_core_v1alpha1_Volume(ref),
 	}
 }
 
@@ -2391,6 +2393,12 @@ func schema_pkg_apis_build_v1alpha2_BuildStatus(ref common.ReferenceCallback) co
 						},
 					},
 					"latestCacheImage": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"latestAttestationImage": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
 							Format: "",
@@ -5548,11 +5556,36 @@ func schema_pkg_apis_core_v1alpha1_ResolvedSourceConfig(ref common.ReferenceCall
 							Ref: ref("github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedRegistrySource"),
 						},
 					},
+					"volume": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedVolumeSource"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedBlobSource", "github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedGitSource", "github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedRegistrySource"},
+			"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedBlobSource", "github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedGitSource", "github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedRegistrySource", "github.com/pivotal/kpack/pkg/apis/core/v1alpha1.ResolvedVolumeSource"},
+	}
+}
+
+func schema_pkg_apis_core_v1alpha1_ResolvedVolumeSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"persistentVolumeClaimName": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"persistentVolumeClaimName"},
+			},
+		},
 	}
 }
 
@@ -5577,6 +5610,11 @@ func schema_pkg_apis_core_v1alpha1_SourceConfig(ref common.ReferenceCallback) co
 							Ref: ref("github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Registry"),
 						},
 					},
+					"volume": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Volume"),
+						},
+					},
 					"subPath": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
@@ -5587,7 +5625,7 @@ func schema_pkg_apis_core_v1alpha1_SourceConfig(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Blob", "github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Git", "github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Registry"},
+			"github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Blob", "github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Git", "github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Registry", "github.com/pivotal/kpack/pkg/apis/core/v1alpha1.Volume"},
 	}
 }
 
@@ -5651,5 +5689,25 @@ func schema_pkg_apis_core_v1alpha1_VolatileTime(ref common.ReferenceCallback) co
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
+func schema_pkg_apis_core_v1alpha1_Volume(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"persistentVolumeClaimName": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"persistentVolumeClaimName"},
+			},
+		},
 	}
 }

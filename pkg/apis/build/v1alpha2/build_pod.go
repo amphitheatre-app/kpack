@@ -248,7 +248,7 @@ func (b *Build) BuildPod(images BuildPodImages, buildContext BuildContext) (*cor
 		runImage = b.Spec.RunImage.Image
 	}
 
-	workspaceVolume := corev1.VolumeMount{
+	workspaceVolumeMount := corev1.VolumeMount{
 		Name:      sourceMount.Name,
 		MountPath: sourceMount.MountPath,
 		SubPath:   b.Spec.Source.SubPath, // empty string is a nop
@@ -304,7 +304,7 @@ func (b *Build) BuildPod(images BuildPodImages, buildContext BuildContext) (*cor
 		SecurityContext: containerSecurityContext(buildContext.BuildPodBuilderConfig),
 		VolumeMounts: volumeMounts([]corev1.VolumeMount{
 			layersMount,
-			workspaceVolume,
+			workspaceVolumeMount,
 			homeMount,
 		}),
 		Env: []corev1.EnvVar{
@@ -333,7 +333,7 @@ func (b *Build) BuildPod(images BuildPodImages, buildContext BuildContext) (*cor
 		VolumeMounts: volumeMounts([]corev1.VolumeMount{
 			layersMount,
 			platformMount,
-			workspaceVolume,
+			workspaceVolumeMount,
 		}, bindingVolumeMounts),
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Env: []corev1.EnvVar{
@@ -517,7 +517,7 @@ func (b *Build) BuildPod(images BuildPodImages, buildContext BuildContext) (*cor
 						VolumeMounts: volumeMounts([]corev1.VolumeMount{
 							layersMount,
 							platformMount,
-							workspaceVolume,
+							workspaceVolumeMount,
 						}, bindingVolumeMounts),
 						ImagePullPolicy: corev1.PullIfNotPresent,
 						Env: []corev1.EnvVar{
@@ -553,7 +553,7 @@ func (b *Build) BuildPod(images BuildPodImages, buildContext BuildContext) (*cor
 							b.Spec.Tags),
 						VolumeMounts: volumeMounts([]corev1.VolumeMount{
 							layersMount,
-							workspaceVolume,
+							workspaceVolumeMount,
 							homeMount,
 							reportMount,
 						}, cacheVolumes),
@@ -607,12 +607,7 @@ func (b *Build) BuildPod(images BuildPodImages, buildContext BuildContext) (*cor
 							EmptyDir: &corev1.EmptyDirVolumeSource{},
 						},
 					},
-					{
-						Name: workspaceVolumeName,
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{},
-						},
-					},
+					b.workspaceVolume(),
 					{
 						Name: platformVolumeName,
 						VolumeSource: corev1.VolumeSource{
@@ -976,6 +971,25 @@ func (b *Build) cacheVolume(os string) []corev1.Volume {
 			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{ClaimName: b.Spec.Cache.Volume.ClaimName},
 		},
 	}}
+}
+
+func (b *Build) workspaceVolume() corev1.Volume {
+	if b.Spec.Source.Volume != nil && b.Spec.Source.Volume.ClaimName != "" {
+		return corev1.Volume{
+			Name: workspaceVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{ClaimName: b.Spec.Source.Volume.ClaimName},
+			},
+		}
+	}
+
+	return corev1.Volume{
+		Name: workspaceVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	}
+
 }
 
 func gitAndDockerSecrets(secret corev1.Secret) bool {
