@@ -13,3 +13,11 @@ coverage.txt
 vendor
 
 pkg/openapi/openapi_generated.go.old
+
+# Binary files
+cmd/build-init/build/build-init
+cmd/build-waiter/build/build-waiter
+cmd/completion/build/completion
+cmd/controller/build/controller
+cmd/rebase/build/rebase
+cmd/webhook/build/webhook
