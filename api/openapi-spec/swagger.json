@@ -5721,6 +5721,9 @@
           "x-kubernetes-patch-merge-key": "type",
           "x-kubernetes-patch-strategy": "merge"
         },
+        "latestAttestationImage": {
+          "type": "string"
+        },
         "latestCacheImage": {
           "type": "string"
         },
@@ -7411,6 +7414,21 @@
         },
         "registry": {
           "$ref": "#/definitions/kpack.core.v1alpha1.ResolvedRegistrySource"
+        },
+        "volume": {
+          "$ref": "#/definitions/kpack.core.v1alpha1.ResolvedVolumeSource"
+        }
+      }
+    },
+    "kpack.core.v1alpha1.ResolvedVolumeSource": {
+      "type": "object",
+      "required": [
+        "persistentVolumeClaimName"
+      ],
+      "properties": {
+        "persistentVolumeClaimName": {
+          "type": "string",
+          "default": ""
         }
       }
     },
@@ -7428,6 +7446,9 @@
         },
         "subPath": {
           "type": "string"
+        },
+        "volume": {
+          "$ref": "#/definitions/kpack.core.v1alpha1.Volume"
         }
       }
     },
@@ -7461,6 +7482,18 @@
       "properties": {
         "inner": {
           "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        }
+      }
+    },
+    "kpack.core.v1alpha1.Volume": {
+      "type": "object",
+      "required": [
+        "persistentVolumeClaimName"
+      ],
+      "properties": {
+        "persistentVolumeClaimName": {
+          "type": "string",
+          "default": ""
         }
       }
     }

@@ -1,0 +1,13 @@
+apiVersion: kpack.io/v1alpha3
+kind: Image
+metadata:
+  name: sample
+spec:
+  tag: sample/image-from-jar
+  builder:
+    kind: ClusterBuilder
+    name: cluster-sample-builder
+  serviceAccountName: service-account
+  source:
+    volume:
+      persistentVolumeClaimName: persistent-volume-claim-name
