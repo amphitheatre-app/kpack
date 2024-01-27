@@ -12,6 +12,7 @@ type SourceConfig struct {
 	Git      *Git      `json:"git,omitempty"`
 	Blob     *Blob     `json:"blob,omitempty"`
 	Registry *Registry `json:"registry,omitempty"`
+	Volume   *Volume   `json:"volume,omitempty"`
 	SubPath  string    `json:"subPath,omitempty"`
 }
 
@@ -22,6 +23,8 @@ func (sc *SourceConfig) Source() Source {
 		return sc.Blob
 	} else if sc.Registry != nil {
 		return sc.Registry
+	} else if sc.Volume != nil {
+		return sc.Volume
 	}
 	return nil
 }
@@ -135,10 +138,35 @@ func (r *Registry) BuildEnvVars() []corev1.EnvVar {
 
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen=true
+type Volume struct {
+	ClaimName string `json:"persistentVolumeClaimName"`
+}
+
+func (v *Volume) ImagePullSecretsVolume(name string) corev1.Volume {
+	return corev1.Volume{
+		Name: name,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	}
+}
+
+func (v *Volume) BuildEnvVars() []corev1.EnvVar {
+	return []corev1.EnvVar{
+		{
+			Name:  "VOLUME_PERSISTENT_VOLUME_CLAIM_NAME",
+			Value: v.ClaimName,
+		},
+	}
+}
+
+// +k8s:openapi-gen=true
+// +k8s:deepcopy-gen=true
 type ResolvedSourceConfig struct {
 	Git      *ResolvedGitSource      `json:"git,omitempty"`
 	Blob     *ResolvedBlobSource     `json:"blob,omitempty"`
 	Registry *ResolvedRegistrySource `json:"registry,omitempty"`
+	Volume   *ResolvedVolumeSource   `json:"volume,omitempty"`
 }
 
 func (sc ResolvedSourceConfig) ResolvedSource() ResolvedSource {
@@ -148,6 +176,8 @@ func (sc ResolvedSourceConfig) ResolvedSource() ResolvedSource {
 		return sc.Blob
 	} else if sc.Registry != nil {
 		return sc.Registry
+	} else if sc.Volume != nil {
+		return sc.Volume
 	}
 	return nil
 }
@@ -248,5 +278,27 @@ func (rs *ResolvedRegistrySource) IsUnknown() bool {
 }
 
 func (rs *ResolvedRegistrySource) IsPollable() bool {
+	return false
+}
+
+// +k8s:openapi-gen=true
+// +k8s:deepcopy-gen=true
+type ResolvedVolumeSource struct {
+	ClaimName string `json:"persistentVolumeClaimName"`
+}
+
+func (v *ResolvedVolumeSource) SourceConfig() SourceConfig {
+	return SourceConfig{
+		Volume: &Volume{
+			ClaimName: v.ClaimName,
+		},
+	}
+}
+
+func (v *ResolvedVolumeSource) IsUnknown() bool {
+	return false
+}
+
+func (v *ResolvedVolumeSource) IsPollable() bool {
 	return false
 }

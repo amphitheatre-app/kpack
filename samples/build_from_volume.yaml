@@ -1,0 +1,13 @@
+apiVersion: kpack.io/v1alpha3
+kind: Build
+metadata:
+  name: sample
+spec:
+  tags:
+  - sample/image
+  serviceAccountName: serviceaccount
+  builder:
+    image: gcr.io/paketo-buildpacks/builder:base
+  source:
+    volume:
+      persistentVolumeClaimName: persistent-volume-claim-name

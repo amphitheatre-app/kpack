@@ -9,7 +9,7 @@ import (
 )
 
 func (s *SourceConfig) Validate(ctx context.Context) *apis.FieldError {
-	sources := make([]string, 0, 3)
+	sources := make([]string, 0, 4)
 	if s.Git != nil {
 		sources = append(sources, "git")
 	}
@@ -19,9 +19,12 @@ func (s *SourceConfig) Validate(ctx context.Context) *apis.FieldError {
 	if s.Registry != nil {
 		sources = append(sources, "registry")
 	}
+	if s.Volume != nil {
+		sources = append(sources, "volume")
+	}
 
 	if len(sources) == 0 {
-		return apis.ErrMissingOneOf("git", "blob", "registry")
+		return apis.ErrMissingOneOf("git", "blob", "registry", "volume")
 	}
 
 	if len(sources) != 1 {
@@ -30,7 +33,8 @@ func (s *SourceConfig) Validate(ctx context.Context) *apis.FieldError {
 
 	return (s.Git.Validate(ctx).ViaField("git")).
 		Also(s.Blob.Validate(ctx).ViaField("blob")).
-		Also(s.Registry.Validate(ctx).ViaField("registry"))
+		Also(s.Registry.Validate(ctx).ViaField("registry")).
+		Also(s.Volume.Validate(ctx).ViaField("volume"))
 }
 
 func (g *Git) Validate(ctx context.Context) *apis.FieldError {
@@ -59,4 +63,12 @@ func (r *Registry) Validate(ctx context.Context) *apis.FieldError {
 	}
 
 	return validate.Image(r.Image)
+}
+
+func (v *Volume) Validate(ctx context.Context) *apis.FieldError {
+	if v == nil {
+		return nil
+	}
+
+	return validate.FieldNotEmpty(v.ClaimName, "persistentVolumeClaimName")
 }
