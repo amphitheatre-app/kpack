@@ -172,12 +172,17 @@ func testImageValidation(t *testing.T, when spec.G, it spec.S) {
 				Image: "registry.com/image",
 			}
 			assertValidationError(image, ctx, apis.ErrMultipleOneOf("git", "blob", "registry").ViaField("spec", "source"))
+
+			image.Spec.Source.Volume = &corev1alpha1.Volume{
+				ClaimName: "some-claim",
+			}
+			assertValidationError(image, ctx, apis.ErrMultipleOneOf("git", "blob", "registry", "volume").ViaField("spec", "source"))
 		})
 
 		it("missing source", func() {
 			image.Spec.Source = corev1alpha1.SourceConfig{}
 
-			assertValidationError(image, ctx, apis.ErrMissingOneOf("git", "blob", "registry").ViaField("spec", "source"))
+			assertValidationError(image, ctx, apis.ErrMissingOneOf("git", "blob", "registry", "volume").ViaField("spec", "source"))
 		})
 
 		it("validates git url", func() {
@@ -217,6 +222,15 @@ func testImageValidation(t *testing.T, when spec.G, it spec.S) {
 			image.Spec.Source.Registry = &corev1alpha1.Registry{Image: "NotValid@@!"}
 
 			assertValidationError(image, ctx, apis.ErrInvalidValue(image.Spec.Source.Registry.Image, "image").ViaField("spec", "source", "registry"))
+		})
+
+		it("validate volume claim name", func() {
+			image.Spec.Source.Git = nil
+			image.Spec.Source.Blob = nil
+			image.Spec.Source.Registry = nil
+			image.Spec.Source.Volume = &corev1alpha1.Volume{ClaimName: ""}
+
+			assertValidationError(image, ctx, apis.ErrMissingField("persistentVolumeClaimName").ViaField("spec", "source", "volume"))
 		})
 
 		it("validates build bindings", func() {
