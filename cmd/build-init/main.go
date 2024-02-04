@@ -39,7 +39,7 @@ var (
 	blobURL                 = flag.String("blob-url", os.Getenv("BLOB_URL"), "The url of the source code blob.")
 	stripComponents         = flag.Int("strip-components", getenvInt("BLOB_STRIP_COMPONENTS", 0), "The number of directory components to strip from the blobs content when extracting.")
 	registryImage           = flag.String("registry-image", os.Getenv("REGISTRY_IMAGE"), "The registry location of the source code image.")
-	volumePVCName           = flag.String("volume-pvc-name", os.Getenv("VOLUME_PVC_NAME"), "The name of the persistent volume claim to use as the source code image.")
+	volumePVCName           = flag.String("volume-pvc-name", os.Getenv("VOLUME_PERSISTENT_VOLUME_CLAIM_NAME"), "The name of the persistent volume claim to use as the source code image.")
 	hostName                = flag.String("dns-probe-hostname", os.Getenv("DNS_PROBE_HOSTNAME"), "hostname to dns poll")
 	sourceSubPath           = flag.String("source-sub-path", os.Getenv("SOURCE_SUB_PATH"), "the subpath inside the source directory that will be the buildpack workspace")
 	buildChanges            = flag.String("build-changes", os.Getenv("BUILD_CHANGES"), "JSON string of build changes and their reason")
@@ -244,7 +244,7 @@ func fetchSource(logger *log.Logger, keychain authn.Keychain) error {
 		}
 		return fetcher.Fetch(appDir, *volumePVCName, projectMetadataDir)
 	default:
-		return errors.New("no git url, blob url, or registry image provided")
+		return errors.New("no git url, blob url, registry image, or volume provided")
 	}
 }
 
