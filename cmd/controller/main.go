@@ -60,6 +60,7 @@ import (
 	"github.com/pivotal/kpack/pkg/registry"
 	"github.com/pivotal/kpack/pkg/secret"
 	"github.com/pivotal/kpack/pkg/slsa"
+	"github.com/pivotal/kpack/pkg/volume"
 )
 
 const (
@@ -186,6 +187,7 @@ func main() {
 	gitResolver := git.NewResolver(k8sClient, cfg.SshTrustUnknownHosts)
 	blobResolver := &blob.Resolver{}
 	registryResolver := &registry.Resolver{}
+	volumeResolver := &volume.Resolver{}
 
 	remoteStoreReader := &cnb.RemoteBuildpackReader{
 		RegistryClient: &registry.Client{},
@@ -228,7 +230,7 @@ func main() {
 
 	buildController := build.NewController(ctx, options, k8sClient, buildInformer, podInformer, metadataRetriever, buildpodGenerator, podProgressLogger, keychainFactory, &slsaAttester, secretFetcher, featureFlags)
 	imageController := image.NewController(ctx, options, k8sClient, imageInformer, buildInformer, duckBuilderInformer, sourceResolverInformer, pvcInformer, cfg.EnablePriorityClasses)
-	sourceResolverController := sourceresolver.NewController(ctx, options, sourceResolverInformer, gitResolver, blobResolver, registryResolver)
+	sourceResolverController := sourceresolver.NewController(ctx, options, sourceResolverInformer, gitResolver, blobResolver, registryResolver, volumeResolver)
 	builderController, builderResync := builder.NewController(ctx, options, builderInformer, builderCreator, keychainFactory, clusterStoreInformer, buildpackInformer, clusterBuildpackInformer, clusterStackInformer, secretFetcher)
 	buildpackController := buildpack.NewController(ctx, options, keychainFactory, buildpackInformer, remoteStoreReader)
 	clusterBuilderController, clusterBuilderResync := clusterbuilder.NewController(ctx, options, clusterBuilderInformer, builderCreator, keychainFactory, clusterStoreInformer, clusterBuildpackInformer, clusterStackInformer, secretFetcher)

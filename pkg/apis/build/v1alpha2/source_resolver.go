@@ -53,6 +53,10 @@ func (sr SourceResolver) IsRegistry() bool {
 	return sr.Spec.Source.Registry != nil
 }
 
+func (sr SourceResolver) IsVolume() bool {
+	return sr.Spec.Source.Volume != nil
+}
+
 func (st *SourceResolver) SourceConfig() corev1alpha1.SourceConfig {
 	return st.Status.Source.ResolvedSource().SourceConfig()
 }
